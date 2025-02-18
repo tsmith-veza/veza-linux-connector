@@ -34,11 +34,12 @@ Set the path for `SSH_CONFIG_PATH` in `config.json`.
 
 Other values that you can configure are:
 
-| Setting | Default | Desc |
-| IGNORE_HOSTS | [*] | A list of hosts in your `.ssh/config` file that should be ignored. |
-| IGNORE_USERS | [] | A list of users to ignore |
-| MAX_LOGS | 5 | The maximum number of log files that should be parsed. |
-| SSH_CONFIG_PATH |  | The path to your `.ssh/config` file |
+|Setting|Default|Desc|
+|---------|---------|------|
+|IGNORE_HOSTS|[*]|A list of hosts in your `.ssh/config` file that should be ignored.|
+|IGNORE_USERS|[]|A list of users to ignore|
+|MAX_LOGS|5|The maximum number of log files that should be parsed.|
+|SSH_CONFIG_PATH||The path to your `.ssh/config` file|
 
 ## Veza setup
 
