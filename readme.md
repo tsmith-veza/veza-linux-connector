@@ -53,4 +53,6 @@ Other values that you can configure are:
 
 ## Run
 
+`pip install -r requirements.txt`
+
 `python3 parse.py`
