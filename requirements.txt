@@ -1,0 +1,13 @@
+certifi==2024.7.4
+cffi==1.16.0
+charset-normalizer==3.3.2
+click==8.1.8
+cryptography==43.0.0
+idna==3.7
+mysql-connector-python==9.0.0
+-e git+https://github.com/Veza/oaaclient-py.git@b01007cee9fd76327d220b52409f4a6f9df295a5#egg=oaaclient
+pycparser==2.22
+PyJWT==2.8.0
+python-dotenv==1.0.1
+requests==2.32.3
+urllib3==2.2.2
