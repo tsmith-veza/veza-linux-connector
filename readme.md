@@ -49,7 +49,7 @@ Other values that you can configure are:
 ## Veza notes
 
 * Every linux machine will be modeled as an application in Veza.
-* To help with troubleshooying, the script will by default save the json object for each app in the local directory. You can toggle this off by changing the value of `SAVE_JSON` in the "Veza config" section of the script.
+* To help with troubleshooting, the script will by default save the json object for each app in the local directory. You can toggle this off by changing the value of `SAVE_JSON` in the "Veza config" section of the script.
 
 ## Run
 
