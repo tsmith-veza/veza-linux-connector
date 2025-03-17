@@ -51,9 +51,26 @@ log = logging.getLogger()
 ########################################
 
 def format_rfc3339(timestamp_str):
-    dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S")
+    """
+    Converts various timestamp formats to RFC 3339 (ISO 8601).
+    Handles:
+      - "2025-03-15T14:41:22" (already RFC 3339)
+      - "Mar 15 14:41:22" (syslog format, assumes current year)
+    """
+    
+    try:
+        # Try parsing ISO 8601 (RFC 3339) format
+        dt = datetime.strptime(timestamp_str, "%Y-%m-%dT%H:%M:%S")
+    except ValueError:
+        try:
+            # Try parsing traditional syslog format (assume current year)
+            dt = datetime.strptime(timestamp_str, "%b %d %H:%M:%S")
+            dt = dt.replace(year=datetime.now().year)  # Add current year
+        except ValueError:
+            raise ValueError(f"Unsupported timestamp format: {timestamp_str}")
+
     dt = dt.replace(tzinfo=timezone.utc)  # Ensure UTC timezone
-    return dt.isoformat()  # Returns in the required format
+    return dt.isoformat()  # Convert to RFC 3339 format
 
 def get_auth_logs(host, host_label):
     """
@@ -101,10 +118,21 @@ def get_auth_logs(host, host_label):
         ssh.close()
 
 def get_hosts():
+    hosts = {}
 
-    hosts = [entry["host"][0] for entry in ssh_config._config]
+    for entry in ssh_config._config:
+        host_label = entry["host"][0]  # Extract the host label
+        host_entry = ssh_config.lookup(host_label)  # Get host details
 
-    return hosts
+        if host_entry.get("hostname") in IGNORE_HOSTS:
+            continue  # Skip ignored hosts
+
+        # Remove 'identityagent' if present
+        host_entry.pop("identityagent", None)
+
+        hosts[host_label] = host_entry  # Store in dictionary with host_label as key
+
+    return hosts  # Return the dictionary
 
 def get_groups(host, host_label):
     """
@@ -414,40 +442,38 @@ def main():
 
     for host_label in hosts:
 
+        print(host_label)
+
         host = ssh_config.lookup(host_label)
 
-        hostname = host.get("hostname", "default_host")
+        log.info(f"Getting users from {host}...")
 
-        if hostname not in IGNORE_HOSTS:
+        users = get_users(host, host_label)
 
-            log.info(f"Getting users from {host}...")
+        log.info(f"Getting auth logs from {host}...")
 
-            users = get_users(host, host_label)
+        auth_logs = get_auth_logs(host, host_label)
 
-            log.info(f"Getting auth logs from {host}...")
+        log.info(f"Parsing auth logs for successful logins...")
 
-            auth_logs = get_auth_logs(host, host_label)
+        logins = parse_auth_logs(auth_logs)
 
-            log.info(f"Parsing auth logs for successful logins...")
+        log.info(f"Adding last_login to user records...")
 
-            logins = parse_auth_logs(auth_logs)
+        parse_logins(users, logins)
 
-            log.info(f"Adding last_login to user records...")
+        log.info(f"Checking sudo status of users...")
 
-            parse_logins(users, logins)
+        get_sudo_status(host, host_label, users)
 
-            log.info(f"Checking sudo status of users...")
+        log.info(f"Getting groups from {host}...")
 
-            get_sudo_status(host, host_label, users)
+        groups = get_groups(host, host_label)
 
-            log.info(f"Getting groups from {host}...")
-
-            groups = get_groups(host, host_label)
-
-            authz_metadata[host_label] = {
-                "users": users,
-                "groups": groups
-            }
+        authz_metadata[host_label] = {
+            "users": users,
+            "groups": groups
+        }
 
     ###################################
     # push to Veza
@@ -471,6 +497,8 @@ def main():
     ###################################
 
     for host_label, host_data in authz_metadata.items():
+
+        host_label = f'linux-{host_label}'
 
         if not veza_con.get_provider(host_label):
             log.info(f"Creating new provider {host_label}")

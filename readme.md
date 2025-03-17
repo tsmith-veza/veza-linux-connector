@@ -1,6 +1,6 @@
 # Veza Linux Connector
 
-This project enables you to harvest authorization metadata from linux hosts and push that authorization metadata to Veza for visualization and analysis.
+This project enables you to pull authorization metadata from linux hosts and push that authorization metadata to Veza for visualization and analysis.
 
 ## How it works
 
