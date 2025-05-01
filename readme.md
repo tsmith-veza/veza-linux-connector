@@ -24,7 +24,7 @@ In the case of password authentication, you can store the password in the `.env`
 
 {host_label}: {password}
 
-The script expects to have `sudo` privileges on the host that it connects to.
+The script expects to have `sudo` privileges on the host(s) that it connects to.
 
 > **Note:** `sudo` privileges are not typically required to read the `/etc/passwd` file, but `sudo` is typically required to read authentication logs.
 
@@ -48,7 +48,7 @@ Other values that you can configure are:
 
 ## Veza notes
 
-* Every linux machine will be modeled as an application in Veza.
+* Every linux machine will be modeled as an application in Veza, under the parent "linux machines" application type.
 * To help with troubleshooting, the script will by default save the json object for each app in the local directory. You can toggle this off by changing the value of `SAVE_JSON` in the "Veza config" section of the script.
 
 ## Run
