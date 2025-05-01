@@ -26,7 +26,7 @@ In the case of password authentication, you can store the password in the `.env`
 
 The script expects to have `sudo` privileges on the host that it connects to.
 
-> **Note:** `sudo` privileges are not typically required to read the /etc/passwd file, but `sudo` is typically required to read authentication logs.
+> **Note:** `sudo` privileges are not typically required to read the `/etc/passwd` file, but `sudo` is typically required to read authentication logs.
 
 ## Setup
 
