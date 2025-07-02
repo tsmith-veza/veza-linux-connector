@@ -1,6 +1,6 @@
-# Veza Linux Connector
+# Veza Linux Parser
 
-This project enables you to pull authorization metadata from linux hosts and push that authorization metadata to Veza for visualization and analysis.
+This python script parses relevant linux files and pushes the extracted authorization metadata to the Veza cloud service.
 
 ## How it works
 
