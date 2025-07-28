@@ -1,0 +1,18 @@
+# File: /etc/sudoers.d/user1_log_access
+# Purpose: Grant 'user1' (or members of the 'adm' group) specific sudo privileges
+# to view important system logs.
+# This file should have permissions 0440 (sudo chmod 0440 /etc/sudoers.d/user1_log_access)
+
+# Allow 'user1' to use 'tail' and 'cat' on common log files as root,
+# without needing a password. This is useful for troubleshooting.
+# Note: Ensure full paths to commands are used.
+user1 ALL=(root) NOPASSWD: /usr/bin/tail /var/log/syslog, \
+                            /usr/bin/tail /var/log/auth.log, \
+                            /usr/bin/cat /var/log/syslog, \
+                            /usr/bin/cat /var/log/auth.log
+
+# Alternatively, if you prefer to grant this to the 'adm' group (which user1 is already a member of):
+# %adm ALL=(root) NOPASSWD: /usr/bin/tail /var/log/syslog, \
+#                           /usr/bin/tail /var/log/auth.log, \
+#                           /usr/bin/cat /var/log/syslog, \
+#                           /usr/bin/cat /var/log/auth.log

@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from oaaclient.client import OAAClient, OAAClientError
 from oaaclient.templates import OAAPropertyType, CustomApplication, OAAPermission
+from pysudoers import Sudoers
 
 #######################################
 # Veza config
@@ -26,6 +27,7 @@ SAVE_JSON = True
 
 DATA_PATH = './data/parser'
 
+GROUP_FILE_FIELD_COUNT = int(os.getenv('GROUP_FILE_FIELD_COUNT', 4))
 PASSWD_FILE_FIELD_COUNT = int(os.getenv('PASSWD_FILE_FIELD_COUNT', 7))
 
 with open('usernames_to_ignore.json', 'r') as f:
@@ -162,91 +164,84 @@ def get_groups(host):
 
     return groups_data
 
-def get_hosts():
-    hosts = {}
+def load_sudoers_from_sudoers_file(app, path):
 
-    for entry in ssh_config._config:
-        host_label = entry["host"][0]  # Extract the host label
-        host_entry = ssh_config.lookup(host_label)  # Get host details
+    sobj = Sudoers(path=path)
 
-        if host_entry.get("hostname") in IGNORE_HOSTS:
-            continue  # Skip ignored hosts
+    for rule in sobj.rules:
 
-        # Remove 'identityagent' if present
-        host_entry.pop("identityagent", None)
+        print("------------")
+        print(rule)
 
-        hosts[host_label] = host_entry  # Store in dictionary with host_label as key
+        users = rule['users']
 
-    return hosts  # Return the dictionary
+        for user in users:
+
+            print(user)
+
+            user_or_group = 'user'
+
+            if user[0] == '%':
+
+                user_or_group = 'group'
+
+                a = user.split('%')
+
+                group_name = a[1]
+            
+            for command_detail in rule['commands']:
+
+                print("###")
+                print(command_detail['command'])
+
+                command = command_detail['command']
+
+                if command not in app.resources:
+
+                    r = app.add_resource(command, command)
+                
+                else:
+
+                    r = app.resources[command]
+                
+                if user_or_group == 'user':
+
+                    app.local_users[user].add_permission(permission="execute", resources=[r])
+                
+                else:
+
+                    app.local_groups[group_name].add_permission(permission="execute", resources=[r])
+
+def load_sudoers_from_sudoers_files(app, host):
+
+    main_sudoers_path = os.path.join(DATA_PATH, host, 'sudoers')
+
+    if not os.path.exists(main_sudoers_path):
+        logging.warning(f"main sudoers file not found: {main_sudoers_path}")
+    
+    load_sudoers_from_sudoers_file(app, main_sudoers_path)
+
+    sudoers_dir_path = os.path.join(DATA_PATH, host, 'sudoers.d')
+
+    if not os.path.exists(sudoers_dir_path):
+        logging.warning(f"sudoers directory not found: {sudoers_dir_path}")
+
+        return
+    
+    files = get_files_os(sudoers_dir_path)
+
+    for filename in files:
+
+        path = os.path.join(sudoers_dir_path, filename)
+
+        load_sudoers_from_sudoers_file(app, path)
+    
+
+    
 
 
-# def get_groups(host):
-#     """
-#     Retrieves only groups that contain at least one user who can SSH into the system.
-#     """
-#     hostname = host.get("hostname", "default_host")
-#     ssh = get_ssh_client(host, host_label)
 
-#     try:
-#         # Fetch all groups and users
-#         stdin, stdout, stderr = ssh.exec_command("getent group")
-#         group_output = stdout.read().decode().strip()
-
-#         stdin, stdout, stderr = ssh.exec_command("getent passwd")
-#         passwd_output = stdout.read().decode().strip()
-
-#         error_output = stderr.read().decode().strip()
-#         if error_output:
-#             print(f"Error retrieving groups on {hostname}: {error_output}")
-#             return {}
-
-#         # Get the list of users who can SSH
-#         ssh_users = set(get_users(host, host_label).keys())  # Extract usernames
-
-#         groups = {}
-
-#         # Parse secondary groups from getent group
-#         for line in group_output.splitlines():
-#             parts = line.split(":")
-#             if len(parts) < 4:
-#                 continue
-
-#             group_name = parts[0]
-#             group_members = set(parts[3].split(",")) if parts[3] else set()
-
-#             # Only add the group if it has at least one SSH-enabled user
-#             if group_members & ssh_users:
-#                 groups[group_name] = group_members
-
-#         # Parse primary groups from getent passwd
-#         for line in passwd_output.splitlines():
-#             parts = line.split(":")
-#             if len(parts) < 4:
-#                 continue
-
-#             username = parts[0]
-#             primary_gid = parts[3]
-
-#             if username in ssh_users:  # Ensure only SSH users are considered
-#                 for group_name, members in groups.items():
-#                     if primary_gid in parts:
-#                         members.add(username)  # Add SSH-enabled user to primary group
-
-#         # Convert sets back to lists
-#         for group_name in groups:
-#             groups[group_name] = list(groups[group_name])
-
-#         return groups
-
-#     except paramiko.ssh_exception.SSHException as e:
-#         print(f"SSH error on {hostname}: {e}")
-#     except Exception as e:
-#         print(f"General error on {hostname}: {e}")
-#     finally:
-#         ssh.close()
-#         print(f"Connection to {hostname} closed.")
-
-#     return {}
+    return
 
 def get_password(hostname):
 
@@ -312,44 +307,6 @@ def get_users(host, host_label):
         print(f"Connection to {hostname} closed.")
 
     return {}
-
-def get_sudo_status(host, host_label, users):
-
-    for username, user in users.items():
-
-        user['can_sudo'] = has_sudo_privileges(host, host_label, username)
-
-def has_sudo_privileges(host, host_label, target_user):
-
-    hostname = host.get("hostname", "default_host")
-
-    ssh = get_ssh_client(host, host_label)
-
-    try:
-        # Run sudo -l -U to check sudo privileges for the target user
-        command = f"sudo -l -U {target_user} 2>/dev/null"
-        stdin, stdout, stderr = ssh.exec_command(command)
-
-        sudo_output = stdout.read().decode().strip()
-        error_output = stderr.read().decode().strip()
-
-        if error_output:
-            print(f"Error checking sudo privileges for {target_user} on {hostname}: {error_output}")
-            return False
-
-        has_sudo = "may run the following commands" in sudo_output
-
-        return has_sudo
-
-    except paramiko.ssh_exception.SSHException as e:
-        print(f"SSH error on {hostname}: {e}")
-    except Exception as e:
-        print(f"General error on {hostname}: {e}")
-    finally:
-        ssh.close()
-        print(f"Connection to {hostname} closed.")
-
-    return False
 
 def parse_auth_logs(logs):
     """
@@ -437,11 +394,12 @@ def load_users_from_passwd_file(app, passwd_data):
             logging.info(f"skipping user {username} in {host_name}")
             continue
 
-        if userid in app.local_users: # this should never happen, but just in case
-            logging.error(f"Duplicate user ID {userid} found in {host_name}: {username}")
+        if username in app.local_users: # this should never happen, but just in case
+            logging.error(f"Duplicate username {username} found in {host_name}")
             exit()
 
-        app.add_local_user(name=username, unique_id=userid)
+        # app.add_local_user(name=username, unique_id=userid)
+        app.add_local_user(name=username)
 
 def load_groups_from_groups_file(app, groups_data):
 
@@ -451,7 +409,7 @@ def load_groups_from_groups_file(app, groups_data):
 
         fields = row.split(':')
 
-        if len(fields) < 4:
+        if len(fields) < GROUP_FILE_FIELD_COUNT:
             logging.warning(f"Malformed line in groups file: {host_name}: {row}")
             continue
 
@@ -462,8 +420,12 @@ def load_groups_from_groups_file(app, groups_data):
         app.add_local_group(group_name)
 
         for member in group_members:
+
+            print(f'the member is: {member}')
             if member in app.local_users:
                 app.local_users[member].add_group(group_name)
+
+                print(f'adding group {group_name} to {member}')
 
 def load_users(app, users):
 
@@ -496,6 +458,37 @@ def load_groups(app, groups):
 
                 app.local_users[username].add_group(group_name)
 
+def get_files_os(path):
+    """
+    Returns a list of files (not subdirectories) in the specified directory.
+
+    Args:
+        path (str): The path to the directory to scan.
+
+    Returns:
+        list: A list of file names (strings) found in the directory.
+              Returns an empty list if the directory is not found,
+              or if there's a permission error, after printing an error message.
+    """
+    files = []
+    try:
+        # Iterate over all items (files and directories) in the given path
+        for item in os.listdir(path):
+            item_path = os.path.join(path, item)
+            # Check if the item is a file (and not a directory)
+            if os.path.isfile(item_path):
+                files.append(item)
+    except FileNotFoundError:
+        print(f"Error: Directory '{path}' not found.")
+        return []
+    except PermissionError:
+        print(f"Error: Permission denied to access '{path}'.")
+        return []
+    except Exception as e:
+        print(f"An unexpected error occurred while listing files in '{path}': {e}")
+        return []
+    return files
+
 def get_subdirectories_os(path):
     subdirectories = []
     try:
@@ -521,12 +514,20 @@ def main():
 
         app = get_app(host_name)
 
+        app.add_custom_permission("execute", [OAAPermission.Uncategorized])
+
+        #########################################
+        # parse passwd file
+
         passwd_users = get_passwd_users(host_name)
 
         if not passwd_users:
             continue
 
         load_users_from_passwd_file(app, passwd_users)
+
+        #########################################
+        # parse groups file
 
         print(f"the groups are:")
         groups = get_groups(host_name)
@@ -538,11 +539,18 @@ def main():
 
         load_groups_from_groups_file(app, groups)
 
+        #########################################
+        # parse sudoers files
+
+        print("looking for sudoers...")
+
+        load_sudoers_from_sudoers_files(app, host_name)
+
+        #########################################
+
         dump_json(app)
 
         # print(passwd_users)
-
-
 
     exit()
 

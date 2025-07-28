@@ -1,0 +1,53 @@
+# This file MUST be edited with the 'visudo' command as root.
+#
+# See the sudoers(5) man page for details on privileges.
+
+# Host alias specification
+# User alias specification
+# Cmnd alias specification
+# Runas alias specification
+
+# User privilege specification
+root    ALL=(ALL:ALL) ALL
+
+# Members of the admin group may gain root privileges
+# %admin ALL=(ALL) ALL
+
+# Allow members of group sudo to execute any command
+%sudo   ALL=(ALL:ALL) ALL
+
+# Allow members of group wheel to execute any command
+%wheel  ALL=(ALL:ALL) ALL
+
+# --- Custom Rules based on your provided passwd and groups files ---
+
+# 1. User: adminuser
+# 'adminuser' is in the 'wheel' and 'sudo' groups, so the above lines already grant full sudo access.
+# If you wanted to explicitly grant them NOPASSWD for specific commands:
+# adminuser ALL=(ALL) NOPASSWD: /usr/bin/apt update, /usr/bin/apt upgrade
+
+# 2. User: user1
+# 'user1' is in the 'sudo' group, so the above line already grants full sudo access.
+# 'user1' is also in 'adm', 'cdrom', 'audio', 'dip', 'video', 'plugdev'.
+# Let's say we want user1 to be able to restart systemd services without a password,
+# but only specific ones.
+user1   ALL=(root) NOPASSWD: /usr/bin/systemctl restart apache2.service, /usr/bin/systemctl restart nginx.service
+
+# 3. User: appsvc (Application Service Account)
+# This user is typically used for running applications and should have very limited sudo access, if any.
+# Example: Allow 'appsvc' to restart a specific application service without a password.
+# appsvc  ALL=(root) NOPASSWD: /usr/bin/systemctl restart myapp.service
+
+# 4. Group: adm
+# The 'adm' group is often used for system monitoring tasks.
+# Let's allow users in 'adm' to read system logs.
+%adm    ALL=(root) /usr/bin/tail, /usr/bin/cat /var/log/syslog, /usr/bin/cat /var/log/auth.log
+
+# 5. Restrict specific commands for a user/group (Example)
+# If you wanted to prevent 'user1' from using 'shutdown' even if they have broader sudo access:
+# user1   ALL=(ALL) !/sbin/shutdown, ALL
+
+# --- End Custom Rules ---
+
+# See sudoers(5) for more information on "@include" and "@includedir" directives.
+#includedir /etc/sudoers.d

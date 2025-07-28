@@ -1,0 +1,11 @@
+# File: /etc/sudoers.d/appsvc_app_management
+# Purpose: Grant specific, limited sudo privileges to the 'appsvc' user
+# for managing a particular application service.
+# This file should have permissions 0440 (sudo chmod 0440 /etc/sudoers.d/appsvc_app_management)
+
+# Allow 'appsvc' to restart, start, and stop a specific application service
+# without requiring a password. This is common for automated scripts or
+# application management tools.
+appsvc ALL=(root) NOPASSWD: /usr/bin/systemctl restart my_application.service, \
+                            /usr/bin/systemctl start my_application.service, \
+                            /usr/bin/systemctl stop my_application.service
