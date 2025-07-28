@@ -1,45 +1,26 @@
 # Veza Linux Parser
 
+This repo contains tools to help you ingest authorization metadata (users, groups, permissions) from linux servers.
+
+There are three approaches available:
+
+`jumpbox.py`
+The basic approach here is:
+* The script runs on a single box.
+* The script gathers data from *n* remote machines and pushes the data back to Veza.
+* The key architectural considerations here are that the host machine has access to all of the required credentials for the remote machines, and the host machine sshs (via the paramiko Python library) into the remote machines.
+
+`parser.py`
+The basic approach here is:
+* The script assumes that the relevant files have already been pulled from the remote machines, and are now stored in the local `/data` folder.
+* The script parses the files and pushes the data to Veza.
+
+`agent.py`
+The basic approach here is:
+* The script runs as a daemon on the local machine
+* The script parses the relevant files from the local machine and pushes the data to Veza.
+
 This python script parses relevant linux files and pushes the extracted authorization metadata to the Veza cloud service.
-
-## How it works
-
-The script opens the file `.ssh/config` on the local machine and looks for hosts.
-
-For each host, the script connects to the host and retrieves authorization metadata:
-
-* users in the user directory (`/etc/passwd`)
-    * only users who have ssh privileges
-* users who have authenticated via ssh against the host (`/var/log`)
-* users who can sudo
-* groups (`/etc/group`)
-
-After the script gathers all of the authorization metadata from all of the hosts, it pushes the data to Veza.
-
-## Authentication to linux hosts
-
-The script will attempt to authenticate against a host in the method dictated by the `.ssh/config` file.
-
-In the case of password authentication, you can store the password in the `.env` file, and the script will look for the password there.
-
-{host_label}: {password}
-
-The script expects to have `sudo` privileges on the host(s) that it connects to.
-
-> **Note:** `sudo` privileges are not typically required to read the `/etc/passwd` file, but `sudo` is typically required to read authentication logs.
-
-## Setup
-
-Set the path for `SSH_CONFIG_PATH` in `config.json`.
-
-Other values that you can configure are:
-
-|Setting|Default|Desc|
-|---------|---------|------|
-|IGNORE_HOSTS|[*]|A list of hosts in your `.ssh/config` file that should be ignored.|
-|IGNORE_USERS|[]|A list of users to ignore|
-|MAX_LOGS|5|The maximum number of log files that should be parsed.|
-|SSH_CONFIG_PATH||The path to your `.ssh/config` file|
 
 ## Veza setup
 
@@ -48,11 +29,10 @@ Other values that you can configure are:
 
 ## Veza notes
 
-* Every linux machine will be modeled as an application in Veza, under the parent "linux machines" application type.
+* The script will create a general bucket in Veza "linux machines"
+* Each linux machine will be modeled as an individual application in Veza, under the parent "linux machines" application type.
 * To help with troubleshooting, the script will by default save the json object for each app in the local directory. You can toggle this off by changing the value of `SAVE_JSON` in the "Veza config" section of the script.
 
-## Run
-
-`pip install -r requirements.txt`
-
-`python3 parse.py`
+[Jumpbox readme](readme_jumpbox.md)
+[Parser readme]
+[Agent readme]

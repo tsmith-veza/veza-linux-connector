@@ -4,4 +4,5 @@ venv
 hosts.csv
 oaa.py
 *.json
+~usernames_to_ignore.json
 .passwords
