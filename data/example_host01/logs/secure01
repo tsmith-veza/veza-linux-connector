@@ -1,0 +1,29 @@
+Jul 29 10:00:01 myhost.example.com sshd[1234]: Accepted publickey for user1 from 192.168.1.10 port 54321 ssh2: RSA SHA256:abcd...
+Jul 29 10:00:01 myhost.example.com systemd-logind[567]: New session 1 of user user1.
+Jul 29 10:00:05 myhost.example.com sudo[1235]: user1 : TTY=pts/0 ; PWD=/home/user1 ; USER=root ; COMMAND=/usr/bin/apt update
+Jul 29 10:00:05 myhost.example.com sudo[1235]: pam_unix(sudo:session): session opened for user root(uid=0) by user1(uid=1000)
+Jul 29 10:00:06 myhost.example.com sudo[1235]: pam_unix(sudo:session): session closed for user root
+Jul 29 10:00:10 myhost.example.com sudo[1236]: user1 : TTY=pts/0 ; PWD=/home/user1 ; USER=root ; COMMAND=/usr/bin/systemctl restart apache2.service
+Jul 29 10:00:10 myhost.example.com sudo[1236]: pam_unix(sudo:session): session opened for user root(uid=0) by user1(uid=1000)
+Jul 29 10:00:11 myhost.example.com sudo[1236]: pam_unix(sudo:session): session closed for user root
+Jul 29 10:00:15 myhost.example.com sudo[1237]: user1 : TTY=pts/0 ; PWD=/home/user1 ; USER=root ; COMMAND=/sbin/fdisk -l
+Jul 29 10:00:15 myhost.example.com sudo[1237]: pam_unix(sudo:auth): authentication failure; logname=uid=1000 euid=0 tty=pts/0 ruser= rhost= user=user1
+Jul 29 10:00:15 myhost.example.com sudo[1237]: user1 : command not allowed ; TTY=pts/0 ; PWD=/home/user1 ; USER=root ; COMMAND=/sbin/fdisk -l
+Jul 29 10:00:20 myhost.example.com sshd[1238]: Accepted password for adminuser from 192.168.1.11 port 43210 ssh2
+Jul 29 10:00:20 myhost.example.com systemd-logind[567]: New session 2 of user adminuser.
+Jul 29 10:00:25 myhost.example.com sudo[1239]: adminuser : TTY=pts/1 ; PWD=/home/adminuser ; USER=root ; COMMAND=/usr/bin/systemctl status sshd
+Jul 29 10:00:25 myhost.example.com sudo[1239]: pam_unix(sudo:auth): authentication failure; logname=uid=1001 euid=0 tty=pts/1 ruser= rhost= user=adminuser
+Jul 29 10:00:25 myhost.example.com sudo[1239]: adminuser : 1 incorrect password attempt ; TTY=pts/1 ; PWD=/home/adminuser ; USER=root ; COMMAND=/usr/bin/systemctl status sshd
+Jul 29 10:00:30 myhost.example.com sudo[1240]: adminuser : TTY=pts/1 ; PWD=/home/adminuser ; USER=root ; COMMAND=/usr/bin/systemctl status sshd
+Jul 29 10:00:30 myhost.example.com sudo[1240]: pam_unix(sudo:session): session opened for user root(uid=0) by adminuser(uid=1001)
+Jul 29 10:00:31 myhost.example.com sudo[1240]: pam_unix(sudo:session): session closed for user root
+Jul 29 10:00:35 myhost.example.com sudo[1241]: appsvc : TTY=unknown ; PWD=/home/appsvc ; USER=root ; COMMAND=/usr/bin/systemctl restart my_application.service
+Jul 29 10:00:35 myhost.example.com sudo[1241]: pam_unix(sudo:session): session opened for user root(uid=0) by appsvc(uid=1002)
+Jul 29 10:00:36 myhost.example.com sudo[1241]: pam_unix(sudo:session): session closed for user root
+Jul 29 10:00:40 myhost.example.com sshd[1242]: Failed password for invaliduser from 192.168.1.100 port 12345 ssh2
+Jul 29 10:00:45 myhost.example.com login[1243]: FAILED LOGIN 1 FROM /dev/tty1 FOR non_existent_user, Authentication failure
+Jul 29 10:00:50 myhost.example.com sshd[1244]: Accepted password for root from 192.168.1.12 port 67890 ssh2
+Jul 29 10:00:50 myhost.example.com systemd-logind[567]: New session 3 of user root.
+Jul 29 10:00:55 myhost.example.com su[1245]: pam_unix(su:auth): authentication failure; logname=user1 uid=1000 euid=1000 tty=pts/0 ruser= rhost= user=root
+Jul 29 10:00:55 myhost.example.com su[1245]: FAILED su for root by user1
+Jul 29 10:00:55 myhost.example.com su[1245]: + /dev/pts/0 user1:root

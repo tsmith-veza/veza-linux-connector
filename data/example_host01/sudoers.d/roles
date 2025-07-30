@@ -1,0 +1,49 @@
+# This file MUST be edited with the 'visudo' command as root.
+#
+# See the sudoers(5) man page for details on privileges.
+
+# User alias specification
+User_Alias APP_SUPPORT = anisha, anandha, anitha.k, h.ramach, jayaseel, kandhpa.p, merlin.i, muthukum, rekha.na, sathishk, s.kar
+User_Alias HELPDEESK = josephc, rogerh, jamaalc, cmendoza, gregoryy, brian.es, craig.ra, ryanj, matthe.o, m.ian.ja, pierce.s, s.scott.op, ernestob, albert.v, paulch, muz.hash, billy.hu, ebad.hus, granrt, michal.u, yohann.m, soumitra, ve.singh, younus.c, christ.f
+User_Alias PHL_PT = allisonn, aless.ab, bren.dy, renee, doras, martha.c, yohann.m
+User_Alias BT_CAN = jennif.c, chrissn, angelac, mariar, monicau
+User_Alias BT_USA = mariar, mariah
+User_Alias FOURGL = narendrj, arnelc, anjanm, michaelx, manojk, akhunte, edj, eric1, alanph, vincentv, phillipc, ralph.ki, narendini, neil.you, gary.tam, marc.stu, smita.mo, sean.bak, tony.phi, tuan.hon, james.xu, veeralak, stac.mac, karan.ra, kavitharg, andrew.k, galina.m, laurentg, abira.ve
+User_Alias OPS = narendrj, michaelx
+User_Alias ADMIN = root
+
+# Cmnd alias specification
+# Define aliases for common commands to simplify rules.
+Cmnd_Alias SYSTEM_SERVICES = /usr/bin/systemctl restart, /usr/bin/systemctl stop, /usr/bin/systemctl start
+Cmnd_Alias LOG_VIEWING = /usr/bin/tail, /usr/bin/cat /var/log/syslog, /usr/bin/cat /var/log/auth.log
+Cmnd_Alias PACKAGE_MANAGEMENT = /usr/bin/apt update, /usr/bin/apt upgrade, /usr/bin/apt install, /usr/bin/apt remove
+
+# User privilege specification
+# Default root user rule
+root    ALL=(ALL:ALL) ALL
+
+# Allow members of group sudo to execute any command (from previous discussion)
+%sudo   ALL=(ALL:ALL) ALL
+
+# Allow members of group wheel to execute any command (from previous discussion)
+%wheel  ALL=(ALL:ALL) ALL
+
+# --- Rules using the User_Alias definitions ---
+
+# Allow APP_SUPPORT users to manage specific system services without password
+APP_SUPPORT ALL=(root) NOPASSWD: SYSTEM_SERVICES
+
+# Allow HELPDEESK users to view logs without password
+HELPDEESK ALL=(root) NOPASSWD: LOG_VIEWING
+
+# Allow OPS users to perform package management tasks with password
+OPS ALL=(root) PACKAGE_MANAGEMENT
+
+# The ADMIN alias (which is 'root') already has full access from the default rule,
+# but you could use it for clarity or to define specific NOPASSWD rules if needed.
+# ADMIN ALL=(ALL) NOPASSWD: ALL
+
+# --- End Custom Rules ---
+
+# See sudoers(5) for more information on "@include" and "@includedir" directives.
+#includedir /etc/sudoers.d

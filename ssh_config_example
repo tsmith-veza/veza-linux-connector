@@ -1,9 +1,0 @@
-Host tsmith-ubuntu-05
-        HostName 51.85.99.147
-        User azureuser
-        IdentityFile ~/.ssh/tsmith-ubuntu_key.pem
-
-Host tsmith-ubuntu-04
-        HostName 122.227.49.131
-        User tsmith-admin
-        PreferredAuthentications password
