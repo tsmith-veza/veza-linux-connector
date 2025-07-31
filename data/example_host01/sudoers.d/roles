@@ -3,14 +3,15 @@
 # See the sudoers(5) man page for details on privileges.
 
 # User alias specification
-User_Alias APP_SUPPORT = anisha, anandha, anitha.k, h.ramach, jayaseel, kandhpa.p, merlin.i, muthukum, rekha.na, sathishk, s.kar
-User_Alias HELPDEESK = josephc, rogerh, jamaalc, cmendoza, gregoryy, brian.es, craig.ra, ryanj, matthe.o, m.ian.ja, pierce.s, s.scott.op, ernestob, albert.v, paulch, muz.hash, billy.hu, ebad.hus, granrt, michal.u, yohann.m, soumitra, ve.singh, younus.c, christ.f
-User_Alias PHL_PT = allisonn, aless.ab, bren.dy, renee, doras, martha.c, yohann.m
-User_Alias BT_CAN = jennif.c, chrissn, angelac, mariar, monicau
-User_Alias BT_USA = mariar, mariah
-User_Alias FOURGL = narendrj, arnelc, anjanm, michaelx, manojk, akhunte, edj, eric1, alanph, vincentv, phillipc, ralph.ki, narendini, neil.you, gary.tam, marc.stu, smita.mo, sean.bak, tony.phi, tuan.hon, james.xu, veeralak, stac.mac, karan.ra, kavitharg, andrew.k, galina.m, laurentg, abira.ve
-User_Alias OPS = narendrj, michaelx
-User_Alias ADMIN = root
+# These aliases have been anonymized and made more realistic.
+User_Alias IT_SUPPORT = jsmith, m_jones, c_adams, l_brown, d_white, r_green, s_king, t_clark, p_hall, k_scott, a_taylor
+User_Alias HELPDESK_STAFF = jdoe, r_williams, j_miller, c_davis, g_wilson, b_moore, c_taylor, r_thomas, m_jackson, p_white, s_harris, e_martin, a_thompson, p_garcia, m_rodriguez, b_davis, a_martinez, p_hernandez, m_lopez, b_gonzalez, a_perez, p_sanchez, m_ramirez, b_campbell, a_rivera, p_gonzalez, m_carter, b_mitchell, a_roberts
+User_Alias PHIL_TEAM = a_lee, e_nguyen, b_kim, r_chen, d_wang, m_li, y_zhang
+User_Alias CAN_BRANCH = j_wilson, c_davis, a_smith, m_jones, m_brown
+User_Alias USA_BRANCH = m_jones, m_brown
+User_Alias FINANCE_TEAM = n_patel, a_singh, j_khan, m_ali, m_ahmed, e_davis, a_johnson, v_kumar, p_sharma, r_gupta, a_verma, v_reddy, s_rao, t_yadav, j_singh, v_pandey, s_mishra, k_garg, a_dubey, g_chaudhary, a_malik, g_khan, l_kumar, a_verma, s_gupta, k_sharma, a_chaudhary, g_singh, l_patel, a_jain, s_mehta, k_agarwal, a_bhatia, g_mittal, l_gupta, a_jain, s_arora, k_verma, a_goel, g_agrawal
+User_Alias OPERATIONS = n_patel, m_ahmed
+User_Alias SYS_ADMINS = root # This alias maps the 'root' user to a generic ADMIN alias.
 
 # Cmnd alias specification
 # Define aliases for common commands to simplify rules.
@@ -30,18 +31,18 @@ root    ALL=(ALL:ALL) ALL
 
 # --- Rules using the User_Alias definitions ---
 
-# Allow APP_SUPPORT users to manage specific system services without password
-APP_SUPPORT ALL=(root) NOPASSWD: SYSTEM_SERVICES
+# Allow IT_SUPPORT users to manage specific system services without password
+IT_SUPPORT ALL=(root) NOPASSWD: SYSTEM_SERVICES
 
-# Allow HELPDEESK users to view logs without password
-HELPDEESK ALL=(root) NOPASSWD: LOG_VIEWING
+# Allow HELPDESK_STAFF users to view logs without password
+HELPDESK_STAFF ALL=(root) NOPASSWD: LOG_VIEWING
 
-# Allow OPS users to perform package management tasks with password
-OPS ALL=(root) PACKAGE_MANAGEMENT
+# Allow OPERATIONS users to perform package management tasks with password
+OPERATIONS ALL=(root) PACKAGE_MANAGEMENT
 
-# The ADMIN alias (which is 'root') already has full access from the default rule,
+# The SYS_ADMINS alias (which is 'root') already has full access from the default rule,
 # but you could use it for clarity or to define specific NOPASSWD rules if needed.
-# ADMIN ALL=(ALL) NOPASSWD: ALL
+# SYS_ADMINS ALL=(ALL) NOPASSWD: ALL
 
 # --- End Custom Rules ---
 

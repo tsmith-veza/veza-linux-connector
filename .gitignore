@@ -6,3 +6,4 @@ oaa.py
 *.json
 ~usernames_to_ignore.json
 .passwords
+*.zip
